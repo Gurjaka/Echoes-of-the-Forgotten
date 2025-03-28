@@ -35,9 +35,9 @@ def main():
     greet_play = False
     prologue_play = False
 
-    pygame.mixer.music.load(f"{data_dir}/audio/prologue.mp3")
-    pygame.mixer.music.play(loops=-1)
-    pygame.mixer.music.set_volume(0.2)
+    # pygame.mixer.music.load(f"{data_dir}/audio/prologue.mp3")
+    # pygame.mixer.music.play(loops=-1)
+    # pygame.mixer.music.set_volume(0.2)
 
     game_start = pygame.time.get_ticks()
 
@@ -68,11 +68,12 @@ def main():
             continue
 
         if not prologue_play:
+            config.screen.fill("black")  # Clear once per frame
             prologue_play = prologue.calculate_prologue_time()
-            prologue_play = not prologue.load_prologue_images()
+            prologue.load_prologue_images()
             prologue.display_image()
-            prologue.calculate_image_time()
-            # prologue.display_text()
+            prologue.display_text()  # This should NOT contain flip()
+            pygame.display.flip()  # Single display update
             continue
 
         config.screen.fill("black")

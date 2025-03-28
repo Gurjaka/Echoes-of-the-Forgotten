@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 
 
 class Prologue:
@@ -35,12 +36,17 @@ class Prologue:
             ],
         ]
 
-        self.text_index = 0  # To track which line of text to display
+        self.char_index = 0
+        self.text_index = 0
+        self.text_font = self.font = pygame.font.Font(
+            f"{self.data_dir}/fonts/DeterminationMonoWebRegular-Z5oq.ttf", 40
+        )
+        self.text_speed = 0
         self.current_text = ""  # Store the current text being displayed
-        self.text_timer = 0  # Track the position in the current line of text
+        self.current_section = 0
         self.last_update_time = pygame.time.get_ticks()  # Time of last text update
-        self.text_speed = 2000  # Milliseconds between each letter
-        self.text_y = 0
+        self.section_delay = 3000
+        self.section_transition_start = -1
 
     def load_prologue_images(self) -> bool:
         try:
@@ -63,8 +69,6 @@ class Prologue:
 
             self.config.screen.blit(self.img, rect)
 
-            pygame.display.flip()
-
     def calculate_image_time(self) -> None:
         current_time = pygame.time.get_ticks()
         if current_time - self.prol_img_start_time > 6 * 1000:
@@ -78,3 +82,68 @@ class Prologue:
             print("Prologue ended, moving to next stage")
             return True
         return False
+
+    def display_text(self) -> None:
+        current_time = pygame.time.get_ticks()
+        screen_rect = self.config.screen.get_rect()
+        center_x = screen_rect.centerx
+        y_start = screen_rect.centery - 50
+
+        # Don't proceed if prologue hasn't started or already finished
+        if current_time < self.prologue_start_time or self.current_section >= len(
+            self.story
+        ):
+            return
+
+        current_section = self.story[self.current_section]
+
+        # Render all completed lines
+        for i in range(self.text_index):
+            if i < len(current_section):
+                text_surface = self.text_font.render(current_section[i], True, "white")
+                text_rect = text_surface.get_rect(center=(center_x, y_start + i * 50))
+                self.config.screen.blit(text_surface, text_rect)
+
+        # Handle current line
+        if self.text_index < len(current_section):
+            # Render current line letter-by-letter
+            partial_text = current_section[self.text_index][: self.char_index]
+            text_surface = self.text_font.render(partial_text, True, "white")
+            text_rect = text_surface.get_rect(
+                center=(center_x, y_start + self.text_index * 50)
+            )
+            self.config.screen.blit(text_surface, text_rect)
+
+            # Update character animation
+            if current_time - self.last_update_time > self.text_speed:
+                self.char_index += 1
+                self.last_update_time = current_time
+
+                # Complete line when all characters shown
+                if self.char_index > len(current_section[self.text_index]):
+                    self.text_index += 1
+                    self.char_index = 0
+                    self.last_update_time = current_time
+
+        # Handle section transition
+        else:
+            if self.section_transition_start == -1:
+                # Start section transition timer
+                self.section_transition_start = current_time
+                # Update to next section's image immediately
+                if self.current_section < len(self.story) - 1:
+                    self.prol_img = self.current_section + 1
+                    self.load_prologue_images()
+
+            # Wait for section delay
+            if current_time - self.section_transition_start > self.section_delay:
+                # Move to next section
+                if self.current_section < len(self.story) - 1:
+                    self.current_section += 1
+                    self.text_index = 0
+                    self.char_index = 0
+                    self.section_transition_start = -1
+                    self.last_update_time = current_time
+                else:
+                    # Prologue completed
+                    pass

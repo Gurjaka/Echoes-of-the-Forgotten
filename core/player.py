@@ -9,9 +9,7 @@ class Player:
         """define necessary settings for player"""
         self.config = config
         self.player_name = ""
-        self.player_pos = pygame.Vector2(
-            self.config.screen.get_width() / 2, self.config.screen.get_height() / 2
-        )
+        self.player_pos = self.config.center
 
     def get_name(self) -> None:
         self.player_name = ""

@@ -1,33 +1,92 @@
+import os
+import sys
 import pygame
 from core.config import *
 from core.player import *
+from core.start_screen import *
+from core.prologue import *
 
 
-# pygame setup
-pygame.init()
-running = True
-main_character = "Kaelen Drystar"  # we might not even use this
-conf = Config()
-py = Player(conf)
+def main():
+    # pygame setup
+    main_dir = os.path.split(os.path.abspath(__file__))[0]
+    data_dir = os.path.join(main_dir, "data")
 
-while running:
-    # Update delta time
-    conf.update_dt()
+    pygame.init()
+    pygame.font.init()
+    pygame.mixer.get_init()
 
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    if not pygame.font.get_init():
+        print("Warning, fonts disabled")
+        sys.exit()
+    if not pygame.mixer.get_init():
+        print("Warning, sound disabled")
+        sys.exit()
 
-    # fill the screen with a color to wipe away anything from last frame
-    conf.screen.fill("#242933")
+    running = True
+    main_character = "Kaelen Drystar"  # we might not even use this
 
-    # RENDER YOUR GAME HERE
-    py.move()  # Move the player first
-    py.spawn_player()  # Then draw the player
+    config = Config(data_dir)
+    start_screen = Start_screen(config)
+    player = Player(config)
 
-    # flip() the display to put your work on screen
-    pygame.display.flip()
+    prologue = Prologue(config, data_dir)
 
-pygame.quit()
+    greet_play = False
+    prologue_play = False
+
+    pygame.mixer.music.load(f"{data_dir}/audio/prologue.mp3")
+    pygame.mixer.music.play(loops=-1)
+    pygame.mixer.music.set_volume(0.2)
+
+    game_start = pygame.time.get_ticks()
+
+    while running:
+        # Update delta time
+        config.update_dt()
+
+        # poll for events
+        # pygame.QUIT event means the user clicked X to close your window
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+        # fill the screen with a color to wipe away anything from last frame
+        config.screen.fill("black")
+
+        # RENDER YOUR GAME HERE
+        if not greet_play:
+            current_time = pygame.time.get_ticks()
+            start_screen.display()
+            pygame.display.flip()
+            if current_time - game_start > 4 * 1000:
+                greet_play = True
+            continue
+
+        if not prologue_play:
+            prologue_play = prologue.calculate_prologue_time()
+            prologue_play = not prologue.load_prologue_images()
+            prologue.display_image()
+            prologue.calculate_image_time()
+            # prologue.display_text()
+            continue
+
+        config.screen.fill("black")
+        pygame.display.flip()
+        # flip() the display to put your work on screen
+        # greet = 1
+        # time.sleep(2)
+        #
+        # player.move()
+        # player.spawn_player()
+        # pygame.display.flip()
+
+    pygame.quit()
+
+
+if __name__ == "__main__":
+    main()

@@ -7,7 +7,7 @@ class Prologue:
         self.data_dir = data
         self.config = conf
 
-        self.prologue_duration = 30  # Display for 30 seconds
+        self.prologue_duration = 58  # Display for 30 seconds
         self.prologue_start_time = pygame.time.get_ticks() + 5 * 1000
         self.prol_img = 0
         self.prol_img_start_time = pygame.time.get_ticks() + 5 * 1000
@@ -19,18 +19,25 @@ class Prologue:
         self.story = [
             [
                 "The world once thrived with humans and mythical creatures living side by side.",
-                "The humans, in their quest for control and power, created an ancient artifact that disturbed the balance of the world.",
-                "This artifact allowed them to seal the creatures into an underground realm, forever separating them from the human world.",
+                "The humans, in their quest for control and power,",
+                "created an ancient artifact that disturbed the balance of the world.",
             ],
             [
+                "This artifact allowed them to seal the creatures into an underground realm,",
+                "forever separating them from the human world.",
                 "Years passed, and the creatures were forgotten. Humans lived their lives,",
-                "oblivious to the damage they had caused, while the underground realm became",
-                "nothing more than a myth. But one fateful day, you, a curious young adventurer,",
+            ],
+            [
+                "oblivious to the damage they had caused, while the",
+                "underground realm became nothing more than a myth.",
+                "But one fateful day, you, a curious young adventurer,",
+            ],
+            [
                 "stumble upon an old, enchanted stone. As you touch it, the world around you twists,",
                 "and you are pulled into the depths of the underground.",
+                "You awaken in a strange, dark world, where creatures of all shapes and sizes stare at you with suspicion.",
             ],
             [
-                "You awaken in a strange, dark world, where creatures of all shapes and sizes stare at you with suspicion.",
                 "Some are friendly, others are hostile. The only thing you know for certain",
                 "is that you are trapped in a world where humans have not set foot for centuries.",
             ],
@@ -41,12 +48,14 @@ class Prologue:
         self.text_font = self.font = pygame.font.Font(
             f"{self.data_dir}/fonts/DeterminationMonoWebRegular-Z5oq.ttf", 40
         )
-        self.text_speed = 0
+        self.text_speed = 30
         self.current_text = ""  # Store the current text being displayed
         self.current_section = 0
         self.last_update_time = pygame.time.get_ticks()  # Time of last text update
         self.section_delay = 3000
         self.section_transition_start = -1
+
+        self.section_images = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
 
     def load_prologue_images(self) -> bool:
         try:
@@ -69,13 +78,6 @@ class Prologue:
 
             self.config.screen.blit(self.img, rect)
 
-    def calculate_image_time(self) -> None:
-        current_time = pygame.time.get_ticks()
-        if current_time - self.prol_img_start_time > 6 * 1000:
-            if self.prol_img < 5:
-                self.prol_img += 1
-                self.prol_img_start_time = pygame.time.get_ticks()
-
     def calculate_prologue_time(self) -> bool:
         self.current_time = pygame.time.get_ticks()
         if self.current_time - self.prologue_start_time > self.prologue_duration * 1000:
@@ -89,7 +91,6 @@ class Prologue:
         center_x = screen_rect.centerx
         y_start = screen_rect.centery - 50
 
-        # Don't proceed if prologue hasn't started or already finished
         if current_time < self.prologue_start_time or self.current_section >= len(
             self.story
         ):
@@ -128,18 +129,14 @@ class Prologue:
         # Handle section transition
         else:
             if self.section_transition_start == -1:
-                # Start section transition timer
                 self.section_transition_start = current_time
-                # Update to next section's image immediately
-                if self.current_section < len(self.story) - 1:
-                    self.prol_img = self.current_section + 1
-                    self.load_prologue_images()
 
-            # Wait for section delay
             if current_time - self.section_transition_start > self.section_delay:
-                # Move to next section
                 if self.current_section < len(self.story) - 1:
+                    # Update section AND image together
                     self.current_section += 1
+                    self.prol_img = self.section_images[self.current_section]
+                    self.load_prologue_images()
                     self.text_index = 0
                     self.char_index = 0
                     self.section_transition_start = -1

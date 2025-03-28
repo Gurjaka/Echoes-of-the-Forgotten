@@ -35,9 +35,9 @@ def main():
     greet_play = False
     prologue_play = False
 
-    # pygame.mixer.music.load(f"{data_dir}/audio/prologue.mp3")
-    # pygame.mixer.music.play(loops=-1)
-    # pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.load(f"{data_dir}/audio/prologue.mp3")
+    pygame.mixer.music.play(loops=-1)
+    pygame.mixer.music.set_volume(0.2)
 
     game_start = pygame.time.get_ticks()
 

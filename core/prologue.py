@@ -8,9 +8,10 @@ class Prologue:
         self.config = conf
 
         self.prologue_duration = 58  # Display for 30 seconds
-        self.prologue_start_time = pygame.time.get_ticks() + 5 * 1000
+        self.prologue_start_time = 0
         self.prol_img = 0
-        self.prol_img_start_time = pygame.time.get_ticks() + 5 * 1000
+        self.prol_img_start_time = 0
+        self.prologue_play = False
 
         self.img = None
         self.img_width = self.config.infoObject.current_w / 100 * 40
@@ -31,11 +32,12 @@ class Prologue:
                 "oblivious to the damage they had caused, while the",
                 "underground realm became nothing more than a myth.",
                 "But one fateful day, you, a curious young adventurer,",
+                "stumble upon an old, enchanted stone. As you touch it, the world around you twists,",
             ],
             [
-                "stumble upon an old, enchanted stone. As you touch it, the world around you twists,",
                 "and you are pulled into the depths of the underground.",
-                "You awaken in a strange, dark world, where creatures of all shapes and sizes stare at you with suspicion.",
+                "You awaken in a strange, dark world, where creatures",
+                "of all shapes and sizes stare at you with suspicion.",
             ],
             [
                 "Some are friendly, others are hostile. The only thing you know for certain",
@@ -56,6 +58,7 @@ class Prologue:
         self.section_transition_start = -1
 
         self.section_images = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+        self.result = False
 
     def load_prologue_images(self) -> bool:
         try:
@@ -144,3 +147,17 @@ class Prologue:
                 else:
                     # Prologue completed
                     pass
+
+    def display(self) -> None:
+        pygame.display.set_caption("Prologue")
+        self.config.screen.fill("black")  # Clear the screen
+
+        self.load_prologue_images()
+        self.display_image()
+        self.display_text()  # Update text
+
+        # Check if prologue time is over
+        if self.calculate_prologue_time():
+            print("Prologue ended, moving to the next stage")
+            self.prologue_play = True  # Mark prologue as done
+            self.result = "game"

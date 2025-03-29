@@ -3,7 +3,7 @@ import sys
 import pygame
 from core.config import *
 from core.player import *
-from core.start_screen import *
+from core.start_menu import *
 from core.prologue import *
 
 
@@ -27,27 +27,22 @@ def main():
     main_character = "Kaelen Drystar"  # we might not even use this
 
     config = Config(data_dir)
-    start_screen = Start_screen(config)
+    start_menu = StartMenu(config)
     player = Player(config)
 
     prologue = Prologue(config, data_dir)
-
-    greet_play = False
-    prologue_play = False
+    current_screen = "start_menu"
 
     pygame.mixer.music.load(f"{data_dir}/audio/prologue.mp3")
     pygame.mixer.music.play(loops=-1)
     pygame.mixer.music.set_volume(0.2)
 
-    game_start = pygame.time.get_ticks()
-
     while running:
         # Update delta time
+        events = pygame.event.get()
         config.update_dt()
 
-        # poll for events
-        # pygame.QUIT event means the user clicked X to close your window
-        for event in pygame.event.get():
+        for event in events:
             if event.type == pygame.QUIT:
                 running = False
 
@@ -55,36 +50,29 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     running = False
 
+        # poll for events
+        # pygame.QUIT event means the user clicked X to close your window
+
         # fill the screen with a color to wipe away anything from last frame
         config.screen.fill("black")
 
-        # RENDER YOUR GAME HERE
-        if not greet_play:
-            current_time = pygame.time.get_ticks()
-            start_screen.display()
-            pygame.display.flip()
-            if current_time - game_start > 4 * 1000:
-                greet_play = True
-            continue
+        if current_screen == "start_menu":
+            result = start_menu.handle_input(events)
+            if result == "START":
+                current_screen = "prologue"
+            elif result == "SETTINGS":
+                current_screen = "settings"
+            # Clear screen and draw menu
+            start_menu.display()
 
-        if not prologue_play:
-            config.screen.fill("black")  # Clear once per frame
-            prologue_play = prologue.calculate_prologue_time()
-            prologue.load_prologue_images()
-            prologue.display_image()
-            prologue.display_text()  # This should NOT contain flip()
-            pygame.display.flip()  # Single display update
-            continue
+        elif current_screen == "prologue":
+            if prologue.result:
+                current_screen = prologue.result
+            else:
+                prologue.display()
 
-        config.screen.fill("black")
-        pygame.display.flip()
         # flip() the display to put your work on screen
-        # greet = 1
-        # time.sleep(2)
-        #
-        # player.move()
-        # player.spawn_player()
-        # pygame.display.flip()
+        pygame.display.flip()
 
     pygame.quit()
 

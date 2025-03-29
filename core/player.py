@@ -8,11 +8,7 @@ class Player:
     def __init__(self, config: Config) -> None:
         """define necessary settings for player"""
         self.config = config
-        self.player_name = ""
         self.player_pos = self.config.center
-
-    def get_name(self) -> None:
-        self.player_name = ""
 
     def spawn_player(self) -> None:
         pygame.draw.circle(self.config.screen, "red", self.player_pos, 40)

@@ -5,6 +5,7 @@ from core.config import *
 from core.player import *
 from core.start_menu import *
 from core.prologue import *
+from core.settings import *
 
 
 def main():
@@ -28,6 +29,7 @@ def main():
 
     config = Config(data_dir)
     start_menu = StartMenu(config)
+    settings = Settings(config)
     player = Player(config)
 
     prologue = Prologue(config, data_dir)
@@ -65,11 +67,21 @@ def main():
             # Clear screen and draw menu
             start_menu.display()
 
+        elif current_screen == "settings":
+            result = settings.handle_input(events)
+            if result:
+                current_screen = result
+            settings.display()
+
         elif current_screen == "prologue":
             if prologue.result:
                 current_screen = prologue.result
             else:
                 prologue.display()
+
+        elif current_screen == "game":
+            player.spawn_player()
+            player.move()
 
         # flip() the display to put your work on screen
         pygame.display.flip()

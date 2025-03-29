@@ -1,17 +1,20 @@
 import pygame
-from core.config import Config
 
 
 class Player:
     """class for player related functions and settings"""
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config, data) -> None:
         """define necessary settings for player"""
         self.config = config
+        self.data_dir = data
+        self.character_sprite = None
         self.player_pos = self.config.center
 
     def spawn_player(self) -> None:
-        pygame.draw.circle(self.config.screen, "red", self.player_pos, 40)
+        character = pygame.image.load(f"{self.data_dir}/npc/nugzari.png")
+        self.character_sprite = pygame.transform.scale(character, (156, 156))
+        self.config.screen.blit(self.character_sprite, self.player_pos)
 
     def move(self) -> None:
         """calculate new player position based on pressed key"""

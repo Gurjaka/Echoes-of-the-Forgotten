@@ -1,3 +1,4 @@
+import pygame
 from pygame.locals import *
 from typing import Union
 
@@ -40,6 +41,15 @@ class StartMenu:
         self.button_rects.append(text_rect)
         self.config.screen.blit(text_surface, text_rect)
 
+    def escape_note(self) -> None:
+        text_font = self.font = pygame.font.Font(
+            f"{self.config.data_dir}/fonts/DeterminationMonoWebRegular-Z5oq.ttf", 60
+        )
+        text = text_font.render('Press "Escape" to quit', True, ("#bf616a"))
+        text_rect = text.get_rect(center=self.config.screen.get_rect().midbottom)
+        text_rect.y -= self.config.infoObject.current_h / 100 * 35
+        self.config.screen.blit(text, text_rect)
+
     def display(self) -> None:
         self.button_rects = []
         screen_rect = self.config.screen.get_rect()
@@ -51,6 +61,7 @@ class StartMenu:
         title_rect = title_text.get_rect(center=screen_rect.midtop)
         title_rect.y += self.config.infoObject.current_h // 100 * 30
         self.config.screen.blit(title_text, title_rect)
+        self.escape_note()
 
         # Calculate button positions
         button_y = screen_rect.centery

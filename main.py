@@ -25,12 +25,12 @@ def main():
         sys.exit()
 
     running = True
-    main_character = "Kaelen Drystar"  # we might not even use this
+    main_character = "Nugzar Khorava"  # we might not even use this
 
     config = Config(data_dir)
     start_menu = StartMenu(config)
     settings = Settings(config)
-    player = Player(config)
+    player = Player(config, data_dir)
 
     prologue = Prologue(config, data_dir)
     current_screen = "start_menu"
